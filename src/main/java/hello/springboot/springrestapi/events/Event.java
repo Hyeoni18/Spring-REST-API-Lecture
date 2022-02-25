@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 @Builder @NoArgsConstructor @AllArgsConstructor
 @Getter @Setter @EqualsAndHashCode(of = "id")
-@Data
 public class Event {
 
     private Integer id;
