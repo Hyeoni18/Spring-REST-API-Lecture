@@ -1,11 +1,14 @@
 package hello.springboot.springrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest //웹과 관련된 bean 등록
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EventControllerTests {
 
     @Autowired
@@ -29,13 +33,10 @@ public class EventControllerTests {
     @Autowired
     ObjectMapper objectMapper;
 
-    //현재 테스트는 슬라이싱 테스트임. Repository를 목킹해야 해. @MockBean을 사용해서 목으로 만들어줘. 근데 이렇게 해도 테스트 error 날거야. mock객체라 save나 다른 것을 하더라도 return null; 이야.
-    @MockBean
-    EventRepository eventRepository;
-
     @Test
     public void createEvent() throws Exception {
         Event event = Event.builder()
+                .id(100)
                 .name("spring")
                 .description("rest api dev")
                 .beginEnrollmentDateTime(LocalDateTime.of(2022,2,25,12,33))
@@ -46,11 +47,12 @@ public class EventControllerTests {
                 .maxPrice(200)
                 .limitOfEnrollment(100)
                 .location("강남역 D2 스타텁 팩토리")
+                .free(true)
+                .offline(false)
+                .eventStatus(EventStatus.PUBLISHED)
                         .build();
 
-        //그러니까 이런 경우에는 해당 이벤트가 발생했을 때 이런 행동을 해라. 정의해야 해.
-        event.setId(10); //id 필요하니까 설정.
-        Mockito.when(eventRepository.save(event)).thenReturn(event);
+        //기존의 목킹을 지워주고, 통합테스트로 전환하면 실제 Repository를 사용해서 테스트가 동작함.
 
         mockMvc.perform(post("/api/events/")
                         .contentType(MediaType.APPLICATION_JSON) //보내는 데이터
@@ -63,6 +65,9 @@ public class EventControllerTests {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("id").value(Matchers.not(100)))
+                .andExpect(jsonPath("free").value(Matchers.not(true)))
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
                 ;
     }
 }
