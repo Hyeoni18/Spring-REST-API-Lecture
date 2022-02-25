@@ -2,13 +2,16 @@ package hello.springboot.springrestapi.events;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.security.cert.CertPathBuilder;
 import java.time.LocalDateTime;
 
 @Builder @NoArgsConstructor @AllArgsConstructor
 @Getter @Setter @EqualsAndHashCode(of = "id")
+@Entity
 public class Event {
 
+    @Id @GeneratedValue
     private Integer id;
 
     private String name;
@@ -24,6 +27,8 @@ public class Event {
 
     private boolean offline; //온,오프라인 여부
     private boolean free; //모임의 유,무료 여부
+
+    @Enumerated(EnumType.STRING) //기본값 ORDINAL인데 STRING으로 바꿔주는게 좋음. ORDINAL은 Enum 순서에 따라서 0,1,2로 숫자 값이 저장됨. 근데 나중에 순서가 바뀌면 데이터가 꼬일 수 있음.
     private EventStatus eventStatus = EventStatus.DRAFT; //이벤트 상태
 
 }
