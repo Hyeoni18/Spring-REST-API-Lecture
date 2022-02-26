@@ -13,6 +13,7 @@ public class EventValidator {
             //무제한 경매인 경우 base > max 일 수는 있음. (설정한 로직 참고)
             errors.rejectValue("basePrice", "wrongValue", "BasePrice is wrong");
             errors.rejectValue("maxPrice", "wrongValue", "MaxPrice is wrong");
+            errors.reject("wrongPrice", "prices are wrong");
         }
 
         LocalDateTime endEventDateTime = eventDto.getEndEventDateTime();
