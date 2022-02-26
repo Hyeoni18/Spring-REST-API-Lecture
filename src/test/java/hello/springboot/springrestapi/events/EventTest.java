@@ -2,15 +2,20 @@ package hello.springboot.springrestapi.events;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
 public class EventTest {
 
     @Test
@@ -38,46 +43,28 @@ public class EventTest {
         assertThat(event.getDescription()).isEqualTo(description);
     }
 
-    @Test
-    public void testFree() {
+    @ParameterizedTest
+    @CsvSource({
+            "0, 0, true",
+            "0, 100, false",
+            "100, 0, false",
+    })
+    public void testFree(int basePrice, int maxPrice, boolean isFree) {
         //Given
         Event event = Event.builder()
-                .basePrice(0)
-                .maxPrice(0)
+                .basePrice(basePrice)
+                .maxPrice(maxPrice)
                 .build();
 
         //When
         event.update();
 
         //Then
-        assertThat(event.isFree()).isTrue();
-
-        //Given
-        event = Event.builder()
-                .basePrice(100)
-                .maxPrice(0)
-                .build();
-
-        //When
-        event.update();
-
-        //Then
-        assertThat(event.isFree()).isFalse();
-
-        //Given
-        event = Event.builder()
-                .basePrice(0)
-                .maxPrice(100)
-                .build();
-
-        //When
-        event.update();
-
-        //Then
-        assertThat(event.isFree()).isFalse();
+        assertThat(event.isFree()).isEqualTo(isFree);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("isOffline")
     public void testOffline() {
         //Given
         Event event = Event.builder()
@@ -99,5 +86,13 @@ public class EventTest {
 
         //Then
         assertThat(event.isOffline()).isFalse();
+    }
+
+    private static Stream<Arguments> isOffline() {
+        return Stream.of(
+                Arguments.of("강남역", true),
+                Arguments.of(null, false),
+                Arguments.of("", false)
+        );
     }
 }
