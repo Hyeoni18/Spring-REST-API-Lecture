@@ -76,15 +76,12 @@ public class EventControllerTests {
                 .andExpect(jsonPath("free").value(false))
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
-                //응답이 잘 생성되었다면 링크 정보를 받을 수 있어야 함.
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists())
                 .andDo(document("create-event"
                     ,links(
                             linkWithRel("self").description("link to self")
                             ,linkWithRel("query-events").description("link to query events")
                             ,linkWithRel("update-event").description("link to update an existing event")
+                            ,linkWithRel("profile").description("link to profile")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header")
@@ -106,7 +103,7 @@ public class EventControllerTests {
                                 headerWithName(HttpHeaders.LOCATION).description("Location header")
                                 ,headerWithName(HttpHeaders.CONTENT_TYPE).description("content Type header")
                         ),
-                        responseFields( //links도 response의 일부분이라 제외하면 error발생. 그래서 responseFields를 relaxedResponseFields로 변경. 일부분만 진행하겠다.
+                        responseFields(
                                 fieldWithPath("id").description("Id of new event")
                                 ,fieldWithPath("name").description("Name of new event")
                                 ,fieldWithPath("description").description("description of new event")
@@ -124,6 +121,7 @@ public class EventControllerTests {
                                 ,fieldWithPath("_links.self.href").description("self")
                                 ,fieldWithPath("_links.query-events.href").description("query-events")
                                 ,fieldWithPath("_links.update-event.href").description("update-event")
+                                ,fieldWithPath("_links.profile.href").description("link to profile")
                         )
                 ))
                 ;
