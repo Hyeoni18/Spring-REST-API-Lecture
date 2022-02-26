@@ -2,6 +2,7 @@ package hello.springboot.springrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.springboot.springrestapi.common.TestDescription;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.lang.annotation.Target;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,17 +55,21 @@ public class EventControllerTests {
 
         mockMvc.perform(post("/api/events/")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
+                        .accept(new MediaType(MediaTypes.HAL_JSON, StandardCharsets.UTF_8))
                                 .content(objectMapper.writer().writeValueAsString(event))
                 )
                 .andDo(print())
                 .andExpect(status().isCreated()) //201
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON+";charset="+StandardCharsets.UTF_8))
                 .andExpect(jsonPath("free").value(false))
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
+                //응답이 잘 생성되었다면 링크 정보를 받을 수 있어야 함.
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
                 ;
     }
 
