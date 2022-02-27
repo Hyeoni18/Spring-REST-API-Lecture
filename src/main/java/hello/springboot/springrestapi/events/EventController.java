@@ -86,4 +86,33 @@ public class EventController {
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id,
+                                      @RequestBody @Valid EventDto eventDto, Errors errors) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if(optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        //옵션이 비어있다면, 이떄 바인딩 에러가 있다면
+        if(errors.hasErrors()) {
+            return badRequest(errors); //위에서 만든 메소드
+        }
+
+        this.eventValidator.validator(eventDto,errors); //바인딩이 잘 됐는지 확인.
+        if(errors.hasErrors()) {    //이번엔 로직상 문제가 있는ㄱㅓ다.
+            return badRequest(errors);
+        }
+        //여기까지 문제가 없다면 update
+
+        Event existingEvent = optionalEvent.get();
+        // existingEvent에 있는 값을 매개변수로 들어온 eventDto로 전부 변경하면 됨.
+        this.modelMapper.map(eventDto, existingEvent); //source가 먼저. 어디에서 - 어디로. (순서)
+        Event savedEvent = this.eventRepository.save(existingEvent);
+
+        EventResource eventResource = new EventResource(savedEvent);
+        eventResource.add(Link.of("/docs/index.html#resources-events-update").withRel("profile"));
+
+        return ResponseEntity.ok(eventResource);
+    }
 }
