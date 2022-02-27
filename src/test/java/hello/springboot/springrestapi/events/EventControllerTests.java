@@ -1,6 +1,7 @@
 package hello.springboot.springrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hello.springboot.springrestapi.common.BaseControllerTest;
 import hello.springboot.springrestapi.common.RestDocsConfiguration;
 import hello.springboot.springrestapi.common.TestDescription;
 import org.hamcrest.Matcher;
@@ -44,19 +45,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs
 @Import(RestDocsConfiguration.class)
 @ActiveProfiles("test")
-public class EventControllerTests {
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
+public class EventControllerTests extends BaseControllerTest {
 
     @Autowired
     EventRepository eventRepository;
-
-    @Autowired
-    ModelMapper modelMapper;
 
     @Test
     @TestDescription("정상적으로 이벤트를 생성하는 테스트")
