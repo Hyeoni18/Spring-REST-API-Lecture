@@ -13,13 +13,11 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -69,6 +67,20 @@ public class EventController {
         var pagedResources = assembler.toModel(page, e -> new EventResource(e));
         pagedResources.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
         return ResponseEntity.ok().body(pagedResources);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity getEvent(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        //Optional로 할 수 있는것은 만약 없다면,
+        if(optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Event event = optionalEvent.get();
+        EventResource eventResource = new EventResource(event);
+        //리소스를 보낼 때 응답에 대한 해석을 할 수 있도록 link를 추가해야해.
+        eventResource.add(Link.of("/docs/index.html#resources-events-get").withRel("profile")); //resources-events-get 정보는 index.adoc에 담겨있음.
+        return ResponseEntity.ok(eventResource); //resource로 만들어서 보내야 해.
     }
 
     private ResponseEntity badRequest(Errors errors) {
