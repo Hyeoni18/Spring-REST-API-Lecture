@@ -1,5 +1,6 @@
 package hello.springboot.springrestapi.events;
 
+import accounts.Account;
 import lombok.*;
 
 import javax.persistence.*;
@@ -30,6 +31,9 @@ public class Event {
 
     @Enumerated(EnumType.STRING) //기본값 ORDINAL인데 STRING으로 바꿔주는게 좋음. ORDINAL은 Enum 순서에 따라서 0,1,2로 숫자 값이 저장됨. 근데 나중에 순서가 바뀌면 데이터가 꼬일 수 있음.
     private EventStatus eventStatus = EventStatus.DRAFT; //이벤트 상태
+
+    @ManyToOne
+    private Account manager;
 
     public void update() {
         //update free
