@@ -1,4 +1,4 @@
-package accounts;
+package hello.springboot.springrestapi.accounts;
 
 public enum AccountRole {
 

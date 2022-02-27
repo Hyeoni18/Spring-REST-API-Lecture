@@ -1,10 +1,9 @@
 package hello.springboot.springrestapi.events;
 
-import accounts.Account;
+import hello.springboot.springrestapi.accounts.Account;
 import lombok.*;
 
 import javax.persistence.*;
-import java.security.cert.CertPathBuilder;
 import java.time.LocalDateTime;
 
 @Builder @NoArgsConstructor @AllArgsConstructor
