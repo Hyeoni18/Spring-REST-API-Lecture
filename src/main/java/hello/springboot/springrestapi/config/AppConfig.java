@@ -40,7 +40,7 @@ public class AppConfig {
             @Override
             public void run(ApplicationArguments args) throws Exception {
                 Account account = Account.builder()
-                        .email("spring@boot.com")
+                        .email("boot@rest.api")
                         .password("pass")
                         .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                         .build();
