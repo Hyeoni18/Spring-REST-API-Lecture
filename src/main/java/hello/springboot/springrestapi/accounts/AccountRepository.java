@@ -1,7 +1,6 @@
 package hello.springboot.springrestapi.accounts;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
