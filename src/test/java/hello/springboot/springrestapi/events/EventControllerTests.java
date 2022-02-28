@@ -5,6 +5,7 @@ import hello.springboot.springrestapi.accounts.Account;
 import hello.springboot.springrestapi.accounts.AccountRepository;
 import hello.springboot.springrestapi.accounts.AccountRole;
 import hello.springboot.springrestapi.accounts.AccountService;
+import hello.springboot.springrestapi.common.AppProperties;
 import hello.springboot.springrestapi.common.BaseControllerTest;
 import hello.springboot.springrestapi.common.RestDocsConfiguration;
 import hello.springboot.springrestapi.common.TestDescription;
@@ -59,16 +60,10 @@ public class EventControllerTests extends BaseControllerTest {
     EventRepository eventRepository;
 
     @Autowired
-    AccountService accountService;
-
-    @Autowired
     AccountRepository accountRepository;
 
-    @BeforeEach
-    public void setUp() {
-        this.eventRepository.deleteAll();
-        this.accountRepository.deleteAll();
-    }
+    @Autowired
+    AppProperties appProperties;
 
     @Test
     @TestDescription("정상적으로 이벤트를 생성하는 테스트")
@@ -156,23 +151,10 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     private String getAccessToken() throws Exception {
-        //Given
-        String username = "spring@boot.com";
-        String password = "pass";
-        Account account = Account.builder()
-                .email(username)
-                .password(password)
-                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
-                .build();
-        this.accountService.saveAccount(account);
-
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret)) //httpBasic은 의존성 추가 필요
-                .param("username", username) //grant Type, username, password. 문서에서 봤던 내용.
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret())) //httpBasic은 의존성 추가 필요
+                .param("username", appProperties.getUserUsername()) //grant Type, username, password. 문서에서 봤던 내용.
+                .param("password", appProperties.getUserPassword())
                 .param("grant_type", "password") //패스워드 인증 타입 사용할거야.
         );
         var responseBody = perform.andReturn().getResponse().getContentAsString();
