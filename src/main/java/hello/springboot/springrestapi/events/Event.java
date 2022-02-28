@@ -1,6 +1,8 @@
 package hello.springboot.springrestapi.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import hello.springboot.springrestapi.accounts.Account;
+import hello.springboot.springrestapi.accounts.AccountSerializer;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,6 +34,7 @@ public class Event {
     private EventStatus eventStatus = EventStatus.DRAFT; //이벤트 상태
 
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
 
     public void update() {
