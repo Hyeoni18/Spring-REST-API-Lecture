@@ -258,6 +258,30 @@ public class EventControllerTests extends BaseControllerTest {
         ;
     }
 
+    @Test
+    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+    public void queryEventsAuthentication() throws Exception {
+        // Given (이벤트 30개 있어야 함)
+        IntStream.range(0,30).forEach(this::generateEvent);
+
+        // When & Then (조회, 페이징과 솔팅이 가능 해야 함)
+        this.mockMvc.perform(get("/api/events")
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken()) //추가
+                        .param("page","1")
+                        .param("size","10")
+                        .param("sort","name,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.create-event").exists()) //추가
+                .andDo(document("query-events"))
+        ;
+    }
+
     private Event generateEvent(int index) {
         Event event = Event.builder()
                 .name("spring")
@@ -295,6 +319,8 @@ public class EventControllerTests extends BaseControllerTest {
                 .andDo(document("get-an-event"))
         ;
     }
+    
+    
 
     @Test
     @TestDescription("없는 이벤트를 조회했을 때 404 응답받기")
