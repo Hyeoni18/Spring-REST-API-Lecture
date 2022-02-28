@@ -1,43 +1,20 @@
 package hello.springboot.springrestapi.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.springboot.springrestapi.accounts.Account;
 import hello.springboot.springrestapi.accounts.AccountRepository;
 import hello.springboot.springrestapi.accounts.AccountRole;
 import hello.springboot.springrestapi.accounts.AccountService;
 import hello.springboot.springrestapi.common.AppProperties;
-import hello.springboot.springrestapi.common.BaseControllerTest;
-import hello.springboot.springrestapi.common.RestDocsConfiguration;
-import hello.springboot.springrestapi.common.TestDescription;
-import org.aspectj.lang.annotation.Before;
-import org.codehaus.jackson.JsonParser;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import hello.springboot.springrestapi.common.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.restdocs.RestDocsMockMvcConfigurationCustomizer;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.ui.ModelMap;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -54,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class EventControllerTests extends BaseControllerTest {
+public class EventControllerTests extends BaseTest {
 
     @Autowired
     EventRepository eventRepository;
@@ -75,7 +52,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("정상적으로 이벤트를 생성하는 테스트")
+    @DisplayName("정상적으로 이벤트를 생성하는 테스트")
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                 .name("spring")
@@ -189,7 +166,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("입력 받을 수 없는 값을 사용했을 때 에러 발생하는 테스트")
+    @DisplayName("입력 받을 수 없는 값을 사용했을 때 에러 발생하는 테스트")
     public void createEvent_Bad_Request() throws Exception {
         Event event = Event.builder()
                 .id(100)
@@ -220,7 +197,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("입력값이 비어있을 때 에러 발생 테스트")
+    @DisplayName("입력값이 비어있을 때 에러 발생 테스트")
     public void createEvent_Bad_Request_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
 
@@ -233,7 +210,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("입력값이 잘못됐을 경우 에러 발생하는 테스트") //주석으로 달아도 괜찮음.
+    @DisplayName("입력값이 잘못됐을 경우 에러 발생하는 테스트") //주석으로 달아도 괜찮음.
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("spring")
@@ -263,7 +240,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+    @DisplayName("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
     public void queryEvents() throws Exception {
         // Given (이벤트 30개 있어야 함)
         IntStream.range(0,30).forEach(this::generateEvent);
@@ -285,7 +262,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
+    @DisplayName("30개의 이벤트를 10개씩 두번째 페이지 조회하기")
     public void queryEventsAuthentication() throws Exception {
         // Given (이벤트 30개 있어야 함)
         IntStream.range(0,30).forEach(this::generateEvent);
@@ -338,7 +315,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("기존의 이벤트를 하나 조회하기")
+    @DisplayName("기존의 이벤트를 하나 조회하기")
     public void getEvent() throws Exception {
         // Given
         Account account = this.createAccount();
@@ -359,7 +336,7 @@ public class EventControllerTests extends BaseControllerTest {
     
 
     @Test
-    @TestDescription("없는 이벤트를 조회했을 때 404 응답받기")
+    @DisplayName("없는 이벤트를 조회했을 때 404 응답받기")
     public void getEvent404() throws Exception {
         // When & Then
         this.mockMvc.perform(get("/api/events/12412"))
@@ -368,7 +345,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("이벤트를 정상적으로 수정하기")
+    @DisplayName("이벤트를 정상적으로 수정하기")
     public void updateEvent() throws Exception {
         // Given
         Account account = this.createAccount();
@@ -394,7 +371,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("입력값이 없는 경우 이벤트 수정 실패")
+    @DisplayName("입력값이 없는 경우 이벤트 수정 실패")
     public void updateEvent400_Empty() throws Exception {
         // Given
         // 로직 문제거나 입력값이 없거나
@@ -416,7 +393,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("입력값이 잘못된 경우 이벤트 수정 실패")
+    @DisplayName("입력값이 잘못된 경우 이벤트 수정 실패")
     public void updateEvent400_Wrong() throws Exception {
         // Given
         // 로직 문제거나 입력값이 없거나
@@ -440,7 +417,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("존재하지 않는 이벤트 수정 실패")
+    @DisplayName("존재하지 않는 이벤트 수정 실패")
     public void updateEvent404() throws Exception {
         // Given
         Event event = this.generateEvent(200);

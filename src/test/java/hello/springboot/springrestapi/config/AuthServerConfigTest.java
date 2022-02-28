@@ -1,24 +1,19 @@
 package hello.springboot.springrestapi.config;
 
-import hello.springboot.springrestapi.accounts.Account;
-import hello.springboot.springrestapi.accounts.AccountRole;
 import hello.springboot.springrestapi.accounts.AccountService;
 import hello.springboot.springrestapi.common.AppProperties;
-import hello.springboot.springrestapi.common.BaseControllerTest;
-import hello.springboot.springrestapi.common.TestDescription;
+import hello.springboot.springrestapi.common.BaseTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AuthServerConfigTest extends BaseControllerTest {
+public class AuthServerConfigTest extends BaseTest {
 
     @Autowired
     AccountService accountService;
@@ -27,7 +22,7 @@ public class AuthServerConfigTest extends BaseControllerTest {
     AppProperties appProperties;
 
     @Test
-    @TestDescription("인증 토큰을 받는 테스트")
+    @DisplayName("인증 토큰을 받는 테스트")
     public void getAuthToken() throws Exception {
         this.mockMvc.perform(post("/oauth/token")
                         .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret())) //httpBasic은 의존성 추가 필요

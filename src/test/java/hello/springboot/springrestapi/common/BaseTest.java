@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(RestDocsConfiguration.class)
 @ActiveProfiles("test")
 @Disabled   //junit4는 @Ignore, 테스트를 가지고 있는 테스트가 아니기 때문에 테스트 실행하면 안됨.
-public class BaseControllerTest {
+public class BaseTest {
 
     @Autowired
     protected MockMvc mockMvc;
