@@ -24,7 +24,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .anonymous()
                 .and()
                 .authorizeRequests()
-                .mvcMatchers(HttpMethod.GET,"/api/**").anonymous()
+                .mvcMatchers(HttpMethod.GET,"/api/**").permitAll()//anonymous 라고 설정하면 anonymous만 사용가능함. 그니까 인증하면 사용 못하게 됨. permitAll로 바꿔줘야 해.
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
