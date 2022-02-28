@@ -63,7 +63,16 @@ public class EventControllerTests extends BaseControllerTest {
     AccountRepository accountRepository;
 
     @Autowired
+    AccountService accountService;
+
+    @Autowired
     AppProperties appProperties;
+
+    @BeforeEach
+    public void deleteUser() {
+        eventRepository.deleteAll();
+        accountRepository.deleteAll();
+    }
 
     @Test
     @TestDescription("정상적으로 이벤트를 생성하는 테스트")
@@ -147,10 +156,18 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     private String getBearerToken() throws Exception {
-        return "Bearer " + getAccessToken();
+        return getBearerToken(true);
     }
 
-    private String getAccessToken() throws Exception {
+    private String getBearerToken(boolean needToCreateAccount) throws Exception {
+        return "Bearer " + getAccessToken(needToCreateAccount);
+    }
+
+    private String getAccessToken(boolean needToCreateAccount) throws Exception {
+        if(needToCreateAccount) {
+            createAccount();
+        }
+
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
                 .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret())) //httpBasic은 의존성 추가 필요
                 .param("username", appProperties.getUserUsername()) //grant Type, username, password. 문서에서 봤던 내용.
@@ -160,6 +177,15 @@ public class EventControllerTests extends BaseControllerTest {
         var responseBody = perform.andReturn().getResponse().getContentAsString();
         Jackson2JsonParser parser = new Jackson2JsonParser();
         return parser.parseMap(responseBody).get("access_token").toString();
+    }
+
+    private Account createAccount() {
+        Account account = Account.builder()
+                .email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
+        return this.accountService.saveAccount(account);
     }
 
     @Test
@@ -282,8 +308,19 @@ public class EventControllerTests extends BaseControllerTest {
         ;
     }
 
+    private Event generateEvent(int index, Account account) {
+        Event event = buildEvent(index);
+        event.setManager(account);
+        return this.eventRepository.save(event);
+    }
+
     private Event generateEvent(int index) {
-        Event event = Event.builder()
+        Event event = buildEvent(index);
+        return this.eventRepository.save(event);
+    }
+
+    private Event buildEvent(int index) {
+        return Event.builder()
                 .name("spring")
                 .description("rest api dev")
                 .beginEnrollmentDateTime(LocalDateTime.of(2022,2,25,12,33))
@@ -298,15 +335,14 @@ public class EventControllerTests extends BaseControllerTest {
                 .offline(true)
                 .eventStatus(EventStatus.DRAFT)
                 .build();
-
-        return this.eventRepository.save(event);
     }
 
     @Test
     @TestDescription("기존의 이벤트를 하나 조회하기")
     public void getEvent() throws Exception {
         // Given
-        Event event = this.generateEvent(100);
+        Account account = this.createAccount();
+        Event event = this.generateEvent(100, account);
 
         // When & Then
         this.mockMvc.perform(get("/api/events/{id}", event.getId()))
@@ -335,8 +371,8 @@ public class EventControllerTests extends BaseControllerTest {
     @TestDescription("이벤트를 정상적으로 수정하기")
     public void updateEvent() throws Exception {
         // Given
-        // 이벤트 필요
-        Event event = this.generateEvent(200);
+        Account account = this.createAccount();
+        Event event = this.generateEvent(200, account);
         // 이벤트 수정할 DTO 필요, 이벤트에서 이벤트DTO를 만들어 낼거야.
         EventDto eventDto = this.modelMapper.map(event, EventDto.class);
         // 그리고 수정하고 싶은 것만 다시 수정하면 돼.
@@ -346,7 +382,7 @@ public class EventControllerTests extends BaseControllerTest {
         // When & Then
         // 업데이트 요청
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
-                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken(false))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(eventDto))
                 )
